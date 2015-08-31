@@ -5,9 +5,6 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 
 /**
  * A Tab inside a SplitTabPane
@@ -16,14 +13,20 @@ public class SplitTab extends Tab{
 
     public SplitTab(){
         label = new Label();
-        tab = new HBox(label);
-        tab.setFillHeight(true);
-        tab.setPadding(new Insets(5));
-        HBox.setHgrow(tab, Priority.ALWAYS);
-        StackPane stackPane = new StackPane(tab);
-        setGraphic(stackPane);
+        label.setPadding(new Insets(5));
+        setGraphic(label);
         setClosable(false);
         setStyle("-fx-padding: 0px");
+        textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue.trim().compareTo("") != 0) {
+                setTabText(newValue);
+            }
+        });
+        graphicProperty().addListener((observable, oldValue, newValue) -> {
+            if(newValue!=label && newValue!=null) {
+                setTabGraphic(newValue);
+            }
+        });
     }
 
     /**
@@ -34,15 +37,6 @@ public class SplitTab extends Tab{
         setContent(pTab.getContent());
         setTabText(pTab.getText());
         setTabGraphic(pTab.getGraphic());
-    }
-
-    /**
-     * HBox containing the label so that the user can click anywhere on the tab to show it
-     */
-    private HBox tab;
-
-    public HBox getTab(){
-        return tab;
     }
 
     /**
@@ -71,6 +65,7 @@ public class SplitTab extends Tab{
      * Choose the graphics
      */
     public void setTabGraphic(Node graphics){
+        setGraphic(null);
         label.setGraphic(graphics);
     }
 

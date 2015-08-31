@@ -14,6 +14,10 @@ public class Controller implements Initializable {
     private AnchorPane anchorPane;
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+
+    }
+
+    public void initWithoutFXML(){
         SplitTabPane splitTabPane = new SplitTabPane();
         SplitTab tab1 = new SplitTab();
         tab1.setTabText("Hello");

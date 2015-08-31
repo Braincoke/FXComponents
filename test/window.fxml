@@ -1,6 +1,19 @@
-<?import javafx.scene.layout.AnchorPane?>
+<?import com.erwandano.fxcomponents.control.SplitTab?>
+<?import com.erwandano.fxcomponents.control.SplitTabPane?>
+<?import javafx.scene.layout.*?>
 <AnchorPane fx:controller="Controller"
           xmlns:fx="http://javafx.com/fxml"
             fx:id="anchorPane">
+    <SplitTabPane fx:id="splitTabPane"
+            AnchorPane.bottomAnchor="0"
+            AnchorPane.leftAnchor="0"
+            AnchorPane.rightAnchor="0"
+            AnchorPane.topAnchor="0" side="BOTTOM"
+            tabPaneMinHeight="35">
+        <tabs>
+            <SplitTab text="Hello" />
+            <SplitTab text="World" />
+        </tabs>
+    </SplitTabPane>
 
 </AnchorPane>

@@ -1,5 +1,13 @@
 package com.erwandano.fxcomponents.control;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Node;
@@ -14,6 +22,13 @@ import javafx.scene.layout.AnchorPane;
  */
 public class SplitTabPane extends AnchorPane {
 
+    private static final double DEFAULT_TABPANE_MIN_HEIGHT = 0;
+
+    private static final PseudoClass TOP_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("top");
+    private static final PseudoClass BOTTOM_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("bottom");
+    private static final PseudoClass LEFT_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("left");
+    private static final PseudoClass RIGHT_PSEUDOCLASS_STATE = PseudoClass.getPseudoClass("right");
+
     /*******************************************************************************************************************
      *                                                                                                                 *
      * CONSTRUCTORS                                                                                                    *
@@ -22,6 +37,17 @@ public class SplitTabPane extends AnchorPane {
 
     public SplitTabPane(){
         tabPane = new TabPane();
+        tabPane.sideProperty().bindBidirectional(this.sideProperty());
+        tabs.addListener(new ListChangeListener<SplitTab>() {
+            @Override
+            public void onChanged(Change<? extends SplitTab> c) {
+                c.next();
+                c.getAddedSubList().forEach(SplitTabPane.this::addTab);
+                c.getRemoved().forEach(SplitTabPane.this::removeTab);
+            }
+        });
+        tabPane.minHeightProperty().bind(this.tabPaneMinHeightProperty());
+        tabPane.minWidthProperty().bind(this.tabPaneMinWidthProperty());
         content = new AnchorPane();
         splitPane = new SplitPane(new AnchorPane(), new AnchorPane());
         position = new SplitTabPosition(splitPane, tabPane);
@@ -105,7 +131,7 @@ public class SplitTabPane extends AnchorPane {
      * @param side
      */
     public void setSide(Side side){
-        tabPane.setSide(side);
+        sideProperty().set(side);
         switch(side){
             case LEFT:
                 splitPane.getItems().setAll(tabPane, content);
@@ -133,19 +159,12 @@ public class SplitTabPane extends AnchorPane {
     }
 
     /**
-     * The the side of the tabPane
-     */
-    public Side getSide(){
-        return tabPane.getSide();
-    }
-
-    /**
      * Add a tab
      */
     public boolean addTab(SplitTab splitTab){
         splitTab.setSide(tabPane.getSide());
         boolean result = tabPane.getTabs().add(splitTab);
-        splitTab.getTab().setOnMouseClicked(event -> tabSelection(splitTab));
+        splitTab.getLabel().setOnMouseClicked(event -> tabSelection(splitTab));
         return  result;
     }
 
@@ -157,7 +176,7 @@ public class SplitTabPane extends AnchorPane {
     public void addTab(int index, SplitTab splitTab){
         splitTab.setSide(tabPane.getSide());
         tabPane.getTabs().add(index, splitTab);
-        splitTab.getTab().setOnMouseClicked(event -> tabSelection(splitTab));
+        splitTab.getLabel().setOnMouseClicked(event -> tabSelection(splitTab));
     }
 
     /**
@@ -167,7 +186,7 @@ public class SplitTabPane extends AnchorPane {
      */
     public boolean removeTab(SplitTab splitTab){
         boolean result = tabPane.getTabs().remove(splitTab);
-        splitTab.getTab().setOnMouseClicked(null);
+        splitTab.getLabel().setOnMouseClicked(null);
         return result;
     }
 
@@ -178,7 +197,7 @@ public class SplitTabPane extends AnchorPane {
      */
     public SplitTab removeTab(int index){
         SplitTab splitTab = (SplitTab) tabPane.getTabs().remove(index);
-        splitTab.getTab().setOnMouseClicked(null);
+        splitTab.getLabel().setOnMouseClicked(null);
         return splitTab;
     }
 
@@ -237,6 +256,154 @@ public class SplitTabPane extends AnchorPane {
      */
     public void showTabPane() {
         splitPane.setDividerPositions(position.getSavedPosition());
+    }
+
+
+    /*******************************************************************************************************************
+     *                                                                                                                 *
+     * USED FOR FXML                                                                                                   *
+     *                                                                                                                 *
+     ******************************************************************************************************************/
+
+    private ObjectProperty<Side> side;
+
+    /**
+     * The current position of the tabs in the TabPane.  The default position
+     * for the tabs is Side.Top.
+     *
+     * @return The current position of the tabs in the TabPane.
+     */
+    public final Side getSide() {
+        return side == null ? Side.TOP : side.get();
+    }
+
+    /**
+     * The position of the tabs in the SplitTabPane.
+     */
+    public final ObjectProperty<Side> sideProperty() {
+        if (side == null) {
+            side = new ObjectPropertyBase<Side>(Side.TOP) {
+                private Side oldSide;
+                @Override protected void invalidated() {
+
+                    oldSide = get();
+
+                    pseudoClassStateChanged(TOP_PSEUDOCLASS_STATE, (oldSide == Side.TOP || oldSide == null));
+                    pseudoClassStateChanged(RIGHT_PSEUDOCLASS_STATE, (oldSide == Side.RIGHT));
+                    pseudoClassStateChanged(BOTTOM_PSEUDOCLASS_STATE, (oldSide == Side.BOTTOM));
+                    pseudoClassStateChanged(LEFT_PSEUDOCLASS_STATE, (oldSide == Side.LEFT));
+                }
+
+                @Override
+                public Object getBean() {
+                    return SplitTabPane.this;
+                }
+
+                @Override
+                public String getName() {
+                    return "side";
+                }
+            };
+        }
+        return side;
+    }
+
+
+    private ObservableList<SplitTab> tabs = FXCollections.observableArrayList();
+
+
+    /**
+     * <p>The tabs to display in this TabPane. Changing this ObservableList will
+     * immediately result in the TabPane updating to display the new contents
+     * of this ObservableList.</p>
+     *
+     * <p>If the tabs ObservableList changes, the selected tab will remain the previously
+     * selected tab, if it remains within this ObservableList. If the previously
+     * selected tab is no longer in the tabs ObservableList, the selected tab will
+     * become the first tab in the ObservableList.</p>
+     */
+    public final ObservableList<SplitTab> getTabs() {
+        return tabs;
+    }
+
+    private DoubleProperty tabPaneMinWidth;
+
+
+    private DoubleProperty tabPaneMinHeight;
+
+    /**
+     * The minimum height of the TabPane.
+     */
+    public final void setTabPaneMinHeight(double value) {
+        tabPaneMinHeightProperty().setValue(value);
+    }
+
+    /**
+     * The minimum height of the TabPane.
+     *
+     * @return The minimum height of the TabPane.
+     */
+    public final double getTabPaneMinHeight() {
+        return tabPaneMinHeight == null ? DEFAULT_TABPANE_MIN_HEIGHT : tabPaneMinHeight.getValue();
+    }
+
+    /**
+     * The minimum height of the TabPane.
+     */
+    public final DoubleProperty tabPaneMinHeightProperty() {
+        if (tabPaneMinHeight == null) {
+            tabPaneMinHeight = new SimpleDoubleProperty(DEFAULT_TABPANE_MIN_HEIGHT) {
+
+                @Override
+                public Object getBean() {
+                    return SplitTabPane.this;
+                }
+
+                @Override
+                public String getName() {
+                    return "tabPaneMinHeight";
+                }
+            };
+        }
+        return tabPaneMinHeight;
+    }
+
+    /**
+     * <p>The minimum width of the TabPane.
+     * </p>
+     */
+    public final void setTabPaneMinWidth(double value) {
+        tabPaneMinWidthProperty().setValue(value);
+    }
+
+    /**
+     * The minimum width of the TabPane.
+     *
+     * @return The minimum width of the TabPane.
+     */
+    public final double getTabPaneMinWidth() {
+        return tabPaneMinWidth == null ? DEFAULT_TABPANE_MIN_HEIGHT : tabPaneMinWidth.getValue();
+    }
+
+    /**
+     * The minimum width of the TabPane.
+     */
+    public final DoubleProperty tabPaneMinWidthProperty() {
+        if (tabPaneMinWidth == null) {
+            tabPaneMinWidth = new SimpleDoubleProperty(DEFAULT_TABPANE_MIN_HEIGHT) {
+
+                @Override
+                public Object getBean() {
+                    return SplitTabPane.this;
+                }
+
+                @Override
+                public String getName() {
+                    return "tabPaneMinWidth";
+                }
+            };
+        }
+        return tabPaneMinWidth;
     }
 
 
