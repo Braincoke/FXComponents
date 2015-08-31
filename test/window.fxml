@@ -1,0 +1,6 @@
+<?import javafx.scene.layout.AnchorPane?>
+<AnchorPane fx:controller="Controller"
+          xmlns:fx="http://javafx.com/fxml"
+            fx:id="anchorPane">
+
+</AnchorPane>
