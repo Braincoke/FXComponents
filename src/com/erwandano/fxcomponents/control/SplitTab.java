@@ -27,6 +27,16 @@ public class SplitTab extends Tab{
     }
 
     /**
+     * Init a SplitTab from an existing Tab
+     */
+    public SplitTab(Tab pTab){
+        super();
+        setContent(pTab.getContent());
+        setTabText(pTab.getText());
+        setTabGraphic(pTab.getGraphic());
+    }
+
+    /**
      * HBox containing the label so that the user can click anywhere on the tab to show it
      */
     private HBox tab;
