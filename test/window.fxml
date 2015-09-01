@@ -1,5 +1,6 @@
 <?import com.erwandano.fxcomponents.control.SplitTab?>
 <?import com.erwandano.fxcomponents.control.SplitTabPane?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.layout.*?>
 <AnchorPane fx:controller="Controller"
           xmlns:fx="http://javafx.com/fxml"
@@ -14,6 +15,11 @@
             <SplitTab text="Hello" />
             <SplitTab text="World" />
         </tabs>
+        <content>
+            <AnchorPane >
+                <Button text="YOOOOO" />
+            </AnchorPane>
+        </content>
     </SplitTabPane>
 
 </AnchorPane>

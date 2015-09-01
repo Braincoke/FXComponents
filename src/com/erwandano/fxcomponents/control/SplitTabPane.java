@@ -37,6 +37,7 @@ public class SplitTabPane extends AnchorPane {
 
     public SplitTabPane(){
         tabPane = new TabPane();
+        tabPane.setRotateGraphic(true);
         tabPane.sideProperty().bindBidirectional(this.sideProperty());
         tabs.addListener(new ListChangeListener<SplitTab>() {
             @Override

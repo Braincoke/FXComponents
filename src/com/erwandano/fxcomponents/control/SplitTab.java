@@ -13,9 +13,10 @@ public class SplitTab extends Tab{
 
     public SplitTab(){
         label = new Label();
-        label.setPadding(new Insets(5));
+        label.setPadding(new Insets(5, 8, 5, 8));
         setGraphic(label);
         setClosable(false);
+        getStyleClass().add("split-tab");
         setStyle("-fx-padding: 0px");
         textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue.trim().compareTo("") != 0) {

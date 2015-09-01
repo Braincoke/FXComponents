@@ -12,7 +12,7 @@ public class SplitTabPosition {
 
 
     private static final double DEFAULT_WIDTH_THRESHOLD = 75;
-    private static final double DEFAULT_WIDTH = 200;
+    private static final double DEFAULT_WIDTH = 300;
 
 
     public SplitTabPosition(SplitPane splitPane, TabPane tabPane){
